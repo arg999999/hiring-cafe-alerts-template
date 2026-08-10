@@ -1,0 +1,15 @@
+{
+  "name": "hiring-cafe-job-alerts",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Emails you new hiring.cafe jobs matching a saved filter, via your own Gmail.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node check.mjs",
+    "dry-run": "DRY_RUN=1 node check.mjs"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.14"
+  }
+}

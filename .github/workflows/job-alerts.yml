@@ -1,0 +1,54 @@
+name: hiring.cafe job alerts
+
+on:
+  schedule:
+    # Every 10 minutes. NOTE: GitHub cron is best-effort — under load, scheduled
+    # runs can be delayed or occasionally skipped, so treat "10 min" as a target.
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run: list new jobs but send no email and don't update seen.json"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write # needed to commit seen.json back to the repo
+
+concurrency:
+  group: job-alerts
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies (nodemailer)
+        run: npm install --no-audit --no-fund
+
+      - name: Check for new jobs
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          DRY_RUN: ${{ (github.event_name == 'workflow_dispatch' && inputs.dry_run) && '1' || '' }}
+        run: node check.mjs
+
+      - name: Persist seen job IDs
+        run: |
+          if [[ -n "$(git status --porcelain seen.json)" ]]; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add seen.json
+            git commit -m "chore: update seen jobs [skip ci]"
+            git push
+          else
+            echo "No state change."
+          fi
