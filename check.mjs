@@ -140,16 +140,11 @@ function jobFields(h) {
 // or "X or Y" — is treated as optional, so the job is kept. Runs on the
 // requirements summary so a mere skills-tag mention elsewhere is ignored.
 // ---------------------------------------------------------------------------
-const EXCLUDED_TECH = [
-  /\bjava\b/i,          // \b avoids matching "javascript"
-  /\bpython\b/i,
-  /\.net\b/i,
-  /\bdotnet\b/i,
-  /\basp\.net\b/i,
-  /\bspring\s*boot\b/i,
-  /\bspringboot\b/i,
-  /\bangular(?:\.?js)?\b/i,
-];
+// Techs you do NOT want to see. A match excludes a job ONLY when the tech is a
+// hard requirement — not when it appears as an alternative like "Node/Python"
+// or "X or Y". Add regexes below (use \b word boundaries). Leave empty to disable.
+// Example: [ /\bjava\b/i, /\bpython\b/i, /\.net\b/i, /\bspring\s*boot\b/i, /\bangular(?:\.?js)?\b/i ]
+const EXCLUDED_TECH = [];
 
 function mandatoryExcludedTech(text) {
   if (!text) return false;
